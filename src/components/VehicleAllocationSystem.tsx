@@ -52,57 +52,6 @@ export default function VehicleAllocationSystem({
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [autoAssignMode, setAutoAssignMode] = useState(false)
 
-  // 指定日の出勤ドライバーと利用可能車両を計算
-  useEffect(() => {
-    calculateAvailability()
-  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, calculateAvailability])
-
-  const calculateAvailability = useCallback(() => {
-    const dateStr = selectedDate.toDateString()
-    
-    // その日に出勤予定のドライバー
-    const attendingDrivers = drivers.filter(driver => {
-      const attendance = attendanceRecords.find(record => 
-        record.driverId === driver.id && 
-        record.date.toDateString() === dateStr &&
-        (record.status === 'present' || record.clockIn)
-      )
-      return attendance || driver.status === 'working'
-    })
-
-    // その日にスケジュールが入っているドライバー
-    const scheduledDrivers = schedules
-      .filter(schedule => schedule.date.toDateString() === dateStr)
-      .map(schedule => schedule.driverId)
-
-    // 実際に働く予定のドライバー
-    const workingDriversList = attendingDrivers.filter(driver => 
-      scheduledDrivers.includes(driver.id) || driver.status === 'working'
-    )
-
-    // 利用可能な車両（メンテナンス中でない車両）
-    const availableVehiclesList = vehicles.filter(vehicle => 
-      vehicle.status === 'active' && 
-      !isVehicleInMaintenance(vehicle, selectedDate)
-    )
-
-    // その日のスケジュールで使用される車両
-    const scheduledVehicles = schedules
-      .filter(schedule => schedule.date.toDateString() === dateStr)
-      .map(schedule => schedule.vehicleId)
-
-    // 実際に利用可能な車両（スケジュールで使用されていない車両）
-    const reallyAvailableVehicles = availableVehiclesList.filter(vehicle =>
-      !scheduledVehicles.includes(vehicle.id)
-    )
-
-    setWorkingDrivers(workingDriversList)
-    setAvailableVehicles(reallyAvailableVehicles)
-
-    // 車両割り当て情報を生成
-    generateAllocations(workingDriversList, availableVehiclesList, scheduledVehicles)
-  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, generateAllocations])
-
   // 車両がメンテナンス中かチェック
   const isVehicleInMaintenance = useCallback((vehicle: Vehicle, date: Date): boolean => {
     if (vehicle.nextInspection) {
@@ -111,6 +60,28 @@ export default function VehicleAllocationSystem({
       return daysDiff <= 1 // 点検日の前後1日はメンテナンス扱い
     }
     return vehicle.status === 'maintenance'
+  }, [])
+
+  // 車両優先度の計算（燃費、走行距離、状態などを考慮）
+  const calculateVehiclePriority = useCallback((vehicle: Vehicle): number => {
+    let priority = 5 // ベース優先度
+
+    // 走行距離による調整
+    if (vehicle.mileage && vehicle.mileage < 50000) priority += 2
+    else if (vehicle.mileage && vehicle.mileage > 100000) priority -= 1
+
+    // 最終点検からの経過時間
+    if (vehicle.lastInspection) {
+      const daysSinceInspection = (Date.now() - vehicle.lastInspection.getTime()) / (1000 * 60 * 60 * 24)
+      if (daysSinceInspection < 30) priority += 1
+      else if (daysSinceInspection > 90) priority -= 1
+    }
+
+    // 車両の種類による調整
+    if (vehicle.type?.includes('2トン')) priority += 1
+    if (vehicle.type?.includes('4トン')) priority += 2
+
+    return Math.max(1, Math.min(10, priority))
   }, [])
 
   // 車両割り当て情報の生成
@@ -167,27 +138,59 @@ export default function VehicleAllocationSystem({
     setAllocations(newAllocations)
   }, [selectedDate, vehicles, schedules, isVehicleInMaintenance, calculateVehiclePriority])
 
-  // 車両優先度の計算（燃費、走行距離、状態などを考慮）
-  const calculateVehiclePriority = useCallback((vehicle: Vehicle): number => {
-    let priority = 5 // ベース優先度
+  // 出勤ドライバーと利用可能車両を計算
+  const calculateAvailability = useCallback(() => {
+    const dateStr = selectedDate.toDateString()
+    
+    // その日に出勤予定のドライバー
+    const attendingDrivers = drivers.filter(driver => {
+      const attendance = attendanceRecords.find(record => 
+        record.driverId === driver.id && 
+        record.date.toDateString() === dateStr &&
+        (record.status === 'present' || record.clockIn)
+      )
+      return attendance || driver.status === 'working'
+    })
 
-    // 走行距離による調整
-    if (vehicle.mileage && vehicle.mileage < 50000) priority += 2
-    else if (vehicle.mileage && vehicle.mileage > 100000) priority -= 1
+    // その日にスケジュールが入っているドライバー
+    const scheduledDrivers = schedules
+      .filter(schedule => schedule.date.toDateString() === dateStr)
+      .map(schedule => schedule.driverId)
 
-    // 最終点検からの経過時間
-    if (vehicle.lastInspection) {
-      const daysSinceInspection = (Date.now() - vehicle.lastInspection.getTime()) / (1000 * 60 * 60 * 24)
-      if (daysSinceInspection < 30) priority += 1
-      else if (daysSinceInspection > 90) priority -= 1
-    }
+    // 実際に働く予定のドライバー
+    const workingDriversList = attendingDrivers.filter(driver => 
+      scheduledDrivers.includes(driver.id) || driver.status === 'working'
+    )
 
-    // 車両の種類による調整
-    if (vehicle.type?.includes('2トン')) priority += 1
-    if (vehicle.type?.includes('4トン')) priority += 2
+    // 利用可能な車両（メンテナンス中でない車両）
+    const availableVehiclesList = vehicles.filter(vehicle => 
+      vehicle.status === 'active' && 
+      !isVehicleInMaintenance(vehicle, selectedDate)
+    )
 
-    return Math.max(1, Math.min(10, priority))
-  }, [])
+    // その日のスケジュールで使用される車両
+    const scheduledVehicles = schedules
+      .filter(schedule => schedule.date.toDateString() === dateStr)
+      .map(schedule => schedule.vehicleId)
+
+    // 実際に利用可能な車両（スケジュールで使用されていない車両）
+    const reallyAvailableVehicles = availableVehiclesList.filter(vehicle =>
+      !scheduledVehicles.includes(vehicle.id)
+    )
+
+    setWorkingDrivers(workingDriversList)
+    setAvailableVehicles(reallyAvailableVehicles)
+
+    // 車両割り当て情報を生成
+    generateAllocations(workingDriversList, availableVehiclesList, scheduledVehicles)
+  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, isVehicleInMaintenance, generateAllocations])
+
+  // 指定日の出勤ドライバーと利用可能車両を計算
+  useEffect(() => {
+    calculateAvailability()
+  }, [calculateAvailability])
+
+
 
   // 自動車両割り当て
   const autoAssignVehicles = () => {
