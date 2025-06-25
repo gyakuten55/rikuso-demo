@@ -108,7 +108,7 @@ export default function VacationRequestForm({
     setValidationErrors(errors)
     setConflictWarnings(warnings)
     return errors.length === 0
-  }, [formData, vacationSettings, existingRequests, editingRequest, selectedDriver])
+  }, [formData, vacationSettings, existingRequests, editingRequest, selectedDriver, calculateDays])
 
   // フォーム送信
   const handleSubmit = (e: React.FormEvent) => {
@@ -225,7 +225,7 @@ export default function VacationRequestForm({
             <label className="form-label">休暇種類</label>
             <select
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'annual' | 'sick' | 'personal' | 'emergency' })}
               className="form-select"
               required
             >

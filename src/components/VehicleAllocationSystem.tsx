@@ -101,7 +101,7 @@ export default function VehicleAllocationSystem({
 
     // 車両割り当て情報を生成
     generateAllocations(workingDriversList, availableVehiclesList, scheduledVehicles)
-  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords])
+  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, generateAllocations])
 
   // 車両がメンテナンス中かチェック
   const isVehicleInMaintenance = (vehicle: Vehicle, date: Date): boolean => {
@@ -114,7 +114,7 @@ export default function VehicleAllocationSystem({
   }
 
   // 車両割り当て情報の生成
-  const generateAllocations = (
+  const generateAllocations = useCallback((
     workingDriversList: Driver[], 
     availableVehiclesList: Vehicle[], 
     scheduledVehicles: number[]
@@ -165,7 +165,7 @@ export default function VehicleAllocationSystem({
     })
 
     setAllocations(newAllocations)
-  }
+  }, [selectedDate, vehicles, schedules, isVehicleInMaintenance, calculateVehiclePriority])
 
   // 車両優先度の計算（燃費、走行距離、状態などを考慮）
   const calculateVehiclePriority = (vehicle: Vehicle): number => {
