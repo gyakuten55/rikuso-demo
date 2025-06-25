@@ -27,14 +27,27 @@ interface VehicleFormProps {
 }
 
 export default function VehicleForm({ vehicle, onSave, onCancel }: VehicleFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    plateNumber: string
+    type: string
+    model: string
+    year: number
+    driver: string
+    team: string
+    status: 'active' | 'maintenance' | 'inspection' | 'breakdown'
+    lastInspection: string
+    nextInspection: string
+    mileage: number
+    location: string
+    notes: string
+  }>({
     plateNumber: '',
     type: '回送車',
     model: '',
     year: new Date().getFullYear(),
     driver: '',
     team: 'Bチーム',
-    status: 'active' as const,
+    status: 'active',
     lastInspection: format(new Date(), 'yyyy-MM-dd'),
     nextInspection: format(new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'), // 6ヶ月後
     mileage: 0,
@@ -284,7 +297,7 @@ export default function VehicleForm({ vehicle, onSave, onCancel }: VehicleFormPr
                 <select
                   className="input-field"
                   value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
+                  onChange={(e) => handleChange('status', e.target.value as 'active' | 'maintenance' | 'inspection' | 'breakdown')}
                 >
                   <option value="active">稼働中</option>
                   <option value="maintenance">メンテナンス</option>
