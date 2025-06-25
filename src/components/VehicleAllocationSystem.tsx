@@ -104,14 +104,14 @@ export default function VehicleAllocationSystem({
   }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, generateAllocations])
 
   // 車両がメンテナンス中かチェック
-  const isVehicleInMaintenance = (vehicle: Vehicle, date: Date): boolean => {
+  const isVehicleInMaintenance = useCallback((vehicle: Vehicle, date: Date): boolean => {
     if (vehicle.nextInspection) {
       const inspectionDate = new Date(vehicle.nextInspection)
       const daysDiff = Math.abs(inspectionDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
       return daysDiff <= 1 // 点検日の前後1日はメンテナンス扱い
     }
     return vehicle.status === 'maintenance'
-  }
+  }, [])
 
   // 車両割り当て情報の生成
   const generateAllocations = useCallback((
@@ -168,7 +168,7 @@ export default function VehicleAllocationSystem({
   }, [selectedDate, vehicles, schedules, isVehicleInMaintenance, calculateVehiclePriority])
 
   // 車両優先度の計算（燃費、走行距離、状態などを考慮）
-  const calculateVehiclePriority = (vehicle: Vehicle): number => {
+  const calculateVehiclePriority = useCallback((vehicle: Vehicle): number => {
     let priority = 5 // ベース優先度
 
     // 走行距離による調整
@@ -187,7 +187,7 @@ export default function VehicleAllocationSystem({
     if (vehicle.type?.includes('4トン')) priority += 2
 
     return Math.max(1, Math.min(10, priority))
-  }
+  }, [])
 
   // 自動車両割り当て
   const autoAssignVehicles = () => {

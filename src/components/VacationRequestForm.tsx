@@ -41,12 +41,12 @@ export default function VacationRequestForm({
   const selectedDriver = drivers.find(d => d.id === formData.driverId)
 
   // 日数を計算
-  const calculateDays = () => {
+  const calculateDays = useCallback(() => {
     if (!formData.startDate || !formData.endDate) return 0
     const start = new Date(formData.startDate)
     const end = new Date(formData.endDate)
     return differenceInDays(end, start) + 1
-  }
+  }, [formData.startDate, formData.endDate])
 
   // バリデーション
   const validateForm = useCallback(() => {
@@ -302,7 +302,7 @@ export default function VacationRequestForm({
                   <label className="form-label">繰り返しパターン</label>
                   <select
                     value={formData.recurringPattern}
-                    onChange={(e) => setFormData({ ...formData, recurringPattern: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, recurringPattern: e.target.value as 'weekly' | 'monthly' })}
                     className="form-select"
                   >
                     <option value="weekly">毎週</option>
