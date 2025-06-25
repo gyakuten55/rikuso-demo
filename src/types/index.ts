@@ -194,6 +194,96 @@ export interface DriverDashboardData {
   vacationQuota?: VacationQuota
 }
 
+// パフォーマンス指標の型定義
+export interface PerformanceMetrics {
+  period: string
+  totalJobs: number
+  completedJobs: number
+  cancelledJobs: number
+  urgentJobs: number
+  completionRate: number
+  onTimeRate: number
+  averageJobDuration: number
+  totalRevenue: number
+  averageRevenuePerJob: number
+  teamPerformance: {
+    [teamName: string]: {
+      jobs: number
+      completion: number
+      revenue: number
+    }
+  }
+  driverPerformance: {
+    [driverId: string]: {
+      name: string
+      jobs: number
+      completion: number
+      onTime: number
+      rating: number
+    }
+  }
+  vehicleUtilization: {
+    [vehicleId: string]: {
+      plateNumber: string
+      utilizationRate: number
+      maintenanceDays: number
+      mileage: number
+    }
+  }
+}
+
+// メンテナンスレポートの型定義
+export interface MaintenanceReport {
+  period: string
+  totalInspections: number
+  completedInspections: number
+  overdueInspections: number
+  maintenanceCost: number
+  downtime: number
+  vehicleStatus: {
+    active: number
+    maintenance: number
+    inspection: number
+    breakdown: number
+  }
+  upcomingInspections: number
+  maintenanceByType: {
+    [type: string]: {
+      count: number
+      cost: number
+      averageDuration: number
+    }
+  }
+}
+
+// 財務レポートの型定義
+export interface FinancialReport {
+  period: string
+  totalRevenue: number
+  totalCost: number
+  netProfit: number
+  profitMargin: number
+  revenueByTeam: {
+    [teamName: string]: number
+  }
+  revenueByServiceType: {
+    [serviceType: string]: number
+  }
+  costBreakdown: {
+    fuel: number
+    maintenance: number
+    labor: number
+    insurance: number
+    other: number
+  }
+  monthlyTrend: Array<{
+    month: string
+    revenue: number
+    cost: number
+    profit: number
+  }>
+}
+
 // 車両関連情報表示用の型定義
 export interface VehicleInformation {
   vehicle: Vehicle
