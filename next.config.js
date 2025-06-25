@@ -3,9 +3,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  experimental: {
-    optimizeCss: true,
-  },
+  swcMinify: true,
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
