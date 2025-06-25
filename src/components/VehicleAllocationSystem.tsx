@@ -55,7 +55,7 @@ export default function VehicleAllocationSystem({
   // 指定日の出勤ドライバーと利用可能車両を計算
   useEffect(() => {
     calculateAvailability()
-  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords])
+  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, calculateAvailability])
 
   const calculateAvailability = () => {
     const dateStr = selectedDate.toDateString()

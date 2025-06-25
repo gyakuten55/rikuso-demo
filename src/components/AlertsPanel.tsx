@@ -78,7 +78,7 @@ export default function AlertsPanel({ vehicles }: AlertsPanelProps) {
     
     return [...vehicleAlerts, ...systemAlerts]
       .sort((a, b) => {
-        const priorityOrder = { high: 3, medium: 2, low: 1 }
+        const priorityOrder: { [key: string]: number } = { high: 3, medium: 2, low: 1 }
         return priorityOrder[b.priority] - priorityOrder[a.priority]
       })
       .slice(0, 4)

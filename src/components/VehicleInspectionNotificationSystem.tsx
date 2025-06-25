@@ -189,7 +189,7 @@ export default function VehicleInspectionNotificationSystem({
 
       return () => clearInterval(interval)
     }
-  }, [vehicles, drivers, autoRefresh, soundEnabled])
+  }, [vehicles, drivers, autoRefresh, soundEnabled, generateInspectionAlerts])
 
   // 優先度に応じたスタイル
   const getAlertStyle = (priority: string) => {
