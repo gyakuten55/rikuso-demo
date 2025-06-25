@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Calendar, User, Clock, AlertTriangle, CheckCircle } from 'lucide-react'
 import { format, addDays, differenceInDays, isWeekend, isBefore, startOfDay } from 'date-fns'
 import { ja } from 'date-fns/locale'
@@ -49,7 +49,7 @@ export default function VacationRequestForm({
   }
 
   // バリデーション
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const errors: string[] = []
     const warnings: string[] = []
 
@@ -108,7 +108,7 @@ export default function VacationRequestForm({
     setValidationErrors(errors)
     setConflictWarnings(warnings)
     return errors.length === 0
-  }
+  }, [formData, vacationSettings, existingRequests, editingRequest, selectedDriver])
 
   // フォーム送信
   const handleSubmit = (e: React.FormEvent) => {

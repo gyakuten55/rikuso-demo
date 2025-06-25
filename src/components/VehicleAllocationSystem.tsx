@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Car, 
   Users, 
@@ -57,7 +57,7 @@ export default function VehicleAllocationSystem({
     calculateAvailability()
   }, [selectedDate, vehicles, drivers, schedules, attendanceRecords, calculateAvailability])
 
-  const calculateAvailability = () => {
+  const calculateAvailability = useCallback(() => {
     const dateStr = selectedDate.toDateString()
     
     // その日に出勤予定のドライバー
@@ -101,7 +101,7 @@ export default function VehicleAllocationSystem({
 
     // 車両割り当て情報を生成
     generateAllocations(workingDriversList, availableVehiclesList, scheduledVehicles)
-  }
+  }, [selectedDate, vehicles, drivers, schedules, attendanceRecords])
 
   // 車両がメンテナンス中かチェック
   const isVehicleInMaintenance = (vehicle: Vehicle, date: Date): boolean => {

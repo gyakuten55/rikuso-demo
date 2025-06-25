@@ -65,7 +65,8 @@ export default function AttendanceManagement({ attendanceRecords, drivers }: Att
 
   // チーム一覧の取得
   const teams = useMemo(() => {
-    const uniqueTeams = [...new Set(drivers.map(driver => driver.team))]
+    const teamSet = new Set(drivers.map(driver => driver.team))
+    const uniqueTeams = Array.from(teamSet)
     return uniqueTeams
   }, [drivers])
 

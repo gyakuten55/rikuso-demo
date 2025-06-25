@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Bell, 
   AlertTriangle, 
@@ -46,7 +46,7 @@ export default function VehicleInspectionNotificationSystem({
   const [showSettings, setShowSettings] = useState(false)
 
   // 点検アラートの生成
-  const generateInspectionAlerts = () => {
+  const generateInspectionAlerts = useCallback(() => {
     const today = new Date()
     const newAlerts: InspectionAlert[] = []
 
@@ -137,7 +137,7 @@ export default function VehicleInspectionNotificationSystem({
         playAlertSound()
       }
     }
-  }
+  }, [vehicles, drivers, alerts, soundEnabled, onNotificationCreate])
 
   // アラート音の再生
   const playAlertSound = () => {
