@@ -64,19 +64,23 @@ export default function Login({ onLogin, onError }: LoginProps) {
     setIsLoading(true)
 
     try {
-      // シンプルな認証ロジック（実際の実装ではAPIを使用）
+      // 簡単な認証ロジック（実際の実装ではAPIを使用）
       await new Promise(resolve => setTimeout(resolve, 1000)) // ローディング演出
 
+      // 社員番号とパスワードの両方をチェック
       const user = sampleUsers.find(u => u.employeeId === employeeId && u.isActive)
       
-      if (user) {
+      if (user && password.length > 0) {
+        // パスワードが入力されていれば認証成功
         const authenticatedUser: UserType = {
           ...user,
           lastLogin: new Date()
         }
         onLogin(authenticatedUser)
-      } else {
+      } else if (!user) {
         onError('社員番号が見つかりません。正しい社員番号を入力してください。')
+      } else {
+        onError('パスワードを入力してください。')
       }
     } catch (error) {
       onError('ログインに失敗しました。しばらく時間をおいて再度お試しください。')
